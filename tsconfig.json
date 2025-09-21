@@ -6,12 +6,17 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": [
+      "nativewind/types"
+    ] // 👈 Add this
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "nativewind.d.ts", // 👈 correct filename
+    "nativewind-env.d.ts"
   ]
 }
