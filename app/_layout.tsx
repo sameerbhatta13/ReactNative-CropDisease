@@ -1,29 +1,36 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-// // Old (deprecated)
-// import { SafeAreaView } from 'react-native';
-
-// // New (recommended)
-// import { SafeAreaView } from 'react-native-safe-area-context';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import "./global.css";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<boolean>(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setUser(true); // change to { id: "123" } if logged in
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        {user ? <Stack.Screen name="(tabs)" /> : <Stack.Screen name="(auth)" />}
       </Stack>
       <StatusBar style="auto" />
-    </ThemeProvider>
+    </>
   );
 }
