@@ -1,5 +1,5 @@
-import { View, Text, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 export default function ForgotPasswordScreen() {
     const router = useRouter();
@@ -14,7 +14,7 @@ export default function ForgotPasswordScreen() {
                 <Text className="text-center text-white font-semibold">Reset Password</Text>
             </Pressable>
 
-            <Pressable onPress={() => router.push("./Login")}>
+            <Pressable onPress={() => router.push("./login")}>
                 <Text className="text-center text-blue-500">Back to Login</Text>
             </Pressable>
         </View>
