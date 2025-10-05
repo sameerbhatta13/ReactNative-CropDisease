@@ -17,17 +17,23 @@ const initialState: AuthState = {
     loading: false,
     error: null,
 };
+
 export const registerUser = createAsyncThunk(
     "auth/registerUser",
     async (formData: Record<string, any>, { rejectWithValue }) => {
         try {
             const response = await api.post("/auth/register", formData);
-            return response.data; // expect { user, token }
+            return response?.data; // expected { user, accessToken }
         } catch (err: any) {
-            return rejectWithValue(err.response.data);
+            // Safely handle network errors
+            if (err.response && err.response?.data) {
+                return rejectWithValue(err.response?.data);
+            }
+            return rejectWithValue({ message: err.message || "Network error" });
         }
     }
 );
+
 
 // Async thunk for login
 export const loginUser = createAsyncThunk(
@@ -35,9 +41,9 @@ export const loginUser = createAsyncThunk(
     async (credentials: { email: string; password: string }, { rejectWithValue }) => {
         try {
             const response = await api.post("/auth/login", credentials);
-            return response.data; // expect { user, token }
+            return response?.data; // expect { user, token }
         } catch (err: any) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.response?.data);
         }
     }
 );
@@ -61,11 +67,11 @@ const authSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.data.user;
+                state.user = action.payload?.data?.user;
                 state.setUser = true;
-                state.token = action.payload.data.accessToken;
+                state.token = action.payload?.data?.accessToken;
 
-                AsyncStorage.setItem('token', action.payload.data.accessToken)
+                AsyncStorage.setItem('token', action?.payload?.data?.accessToken)
             })
             .addCase(loginUser.rejected, (state, action: any) => {
                 state.loading = false;
@@ -80,15 +86,15 @@ const authSlice = createSlice({
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.setUser = true;
-                state.user = action.payload.data.user;
-                state.token = action.payload.data.accessToken;
+                state.user = action.payload?.data?.user;
+                state.token = action.payload?.data?.accessToken;
 
                 AsyncStorage.setItem('token', action.payload.data.accessToken)
             })
             .addCase(registerUser.rejected, (state, action: any) => {
                 state.loading = false;
                 state.setUser = false
-                state.error = action.payload?.message || "Register failed";
+                state.error = action?.payload || "Register failed";
             });
     },
 });
