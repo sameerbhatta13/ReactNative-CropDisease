@@ -1,12 +1,43 @@
+import { AppDispatch } from "@/src/store";
+import { loginUser } from "@/src/store/slices/authSlice";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { useDispatch } from "react-redux";
+import { FormData } from "./signup";
 
 export default function LoginScreen() {
     const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>()
 
-    const handleLogin = () => {
-        // Perform login logic here
+    // const loading = useSelector((state: RootState) => state.auth.loading);
+    const [formData, setFormData] = useState<FormData>({
+        email: '',
+        password: ''
+    })
+
+    const handleChange = (field: string) => (value: string) => {
+        setFormData({
+            ...formData,
+            [field]: value
+        });
+    }
+
+    const handleLogin = async (e: any) => {
+
         console.log("Login pressed");
+        try {
+            const response = await dispatch(loginUser(formData))
+            console.log('response', response)
+            if (response.meta.requestStatus === "fulfilled") {
+                router.push("/(tabs)"); // success → go to home
+            } else {
+                alert("Invalid credentials");
+            }
+        } catch (err: any) {
+            alert(err.message || "Invalid credentials");
+
+        }
     };
 
     return (
@@ -25,11 +56,13 @@ export default function LoginScreen() {
                 <TextInput
                     placeholder="Email"
                     placeholderTextColor="#9ca3af"
+                    onChangeText={handleChange('email')}
                     className="w-full border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl mb-4 text-gray-900 dark:text-white"
                 />
                 <TextInput
                     placeholder="Password"
                     placeholderTextColor="#9ca3af"
+                    onChangeText={handleChange('password')}
                     secureTextEntry
                     className="w-full  border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl mb-6 text-gray-900 dark:text-white"
                 />
