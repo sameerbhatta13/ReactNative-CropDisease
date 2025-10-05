@@ -1,33 +1,52 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../../api/axiosInstance";
 
+interface User {
+    _id: string;
+    name: string;
+    email: string;
+}
+
+interface Profile {
+    _id: string;
+    user: User;
+    dob: string; // ISO date string
+    address: string;
+    phone: string;
+    gender: "male" | "female" | "other";
+    avatarUrl?: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+}
+
 interface ProfileState {
-    profile: string | null
-    token: string | null;
-    setUser: boolean;
+    profile: Profile | null;
+    setProfile: boolean;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: ProfileState = {
     profile: null,
-    token: null,
-    setUser: false,
+    setProfile: false,
     loading: false,
     error: null,
 };
 export const createProfile = createAsyncThunk(
     "profile/createProfile",
-    async (formData: Record<string, any>, { rejectWithValue }) => {
+    async (formData: FormData, { rejectWithValue }) => {
         try {
-            const response = await api.post("/profile", formData);
-            return response.data; // expect { user, token }
+            const response = await api.post("/profile", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data; // { success, message, data }
         } catch (err: any) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.response?.data);
         }
     }
 );
+
 
 // Async thunk for login
 export const getProfile = createAsyncThunk(
@@ -42,13 +61,27 @@ export const getProfile = createAsyncThunk(
     }
 );
 
+export const updateProfile = createAsyncThunk(
+    "profile/updateProfile",
+    async (formData: FormData, { rejectWithValue }) => {
+        try {
+            const response = await api.patch("/profile", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data;
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const profileSlice = createSlice({
     name: "profile",
     initialState,
     reducers: {
         deleteProfile: (state) => {
             state.profile = null;
-            state.token = null;
+            state.setProfile = false
             state.error = null;
         },
     },
@@ -56,38 +89,50 @@ const profileSlice = createSlice({
         builder
             .addCase(createProfile.pending, (state) => {
                 state.loading = true;
-                state.setUser = false
+                state.setProfile = false
                 state.error = null;
             })
             .addCase(createProfile.fulfilled, (state, action) => {
                 state.loading = false;
                 state.profile = action.payload.data;
-                state.setUser = true;
-                state.token = action.payload.data.accessToken;
+                state.setProfile = true;
 
-                AsyncStorage.setItem('token', action.payload.data.accessToken)
             })
             .addCase(createProfile.rejected, (state, action: any) => {
                 state.loading = false;
-                state.setUser = false;
+                state.setProfile = false;
                 state.error = action.payload?.message || "Login failed";
             })
             .addCase(getProfile.pending, (state) => {
                 state.loading = true;
-                state.setUser = false;
+                state.setProfile = false;
                 state.error = null;
             })
             .addCase(getProfile.fulfilled, (state, action) => {
                 state.loading = false;
-                state.setUser = true;
+                state.setProfile = true;
                 state.profile = action.payload.data;
-                state.token = action.payload.data.accessToken;
 
-                AsyncStorage.setItem('token', action.payload.data.accessToken)
             })
             .addCase(getProfile.rejected, (state, action: any) => {
                 state.loading = false;
-                state.setUser = false
+                state.setProfile = false
+                state.error = action.payload?.message || "Register failed";
+            })
+            .addCase(updateProfile.pending, (state) => {
+                state.loading = true;
+                state.setProfile = false;
+                state.error = null;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.setProfile = true;
+                state.profile = action.payload.data;
+
+            })
+            .addCase(updateProfile.rejected, (state, action: any) => {
+                state.loading = false;
+                state.setProfile = false
                 state.error = action.payload?.message || "Register failed";
             });
     },
