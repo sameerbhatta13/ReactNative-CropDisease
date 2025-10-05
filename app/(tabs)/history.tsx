@@ -28,8 +28,9 @@ export default function history() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View>
-            here are the list of data
+            <Text>See Your history</Text>
           </View>
+
 
         )}
       />
