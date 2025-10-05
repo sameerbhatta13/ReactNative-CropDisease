@@ -63,7 +63,7 @@ export default function LoginScreen() {
                     placeholder="Password"
                     placeholderTextColor="#9ca3af"
                     onChangeText={handleChange('password')}
-                    secureTextEntry
+                    // secureTextEntry
                     className="w-full  border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl mb-6 text-gray-900 dark:text-white"
                 />
 

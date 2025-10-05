@@ -25,6 +25,7 @@ export default function SignupScreen() {
         password: "",
         confirmPassword: "",
     })
+
     const handleChange = (field: string) => (value: string) => {
         setFormData({
             ...formData,
@@ -33,7 +34,8 @@ export default function SignupScreen() {
     }
 
     const handleSubmit = async () => {
-
+        console.log('pressed')
+        console.log('formdata', formData)
         // Basic validation
         if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
             Alert.alert('All fields are required');
@@ -52,6 +54,7 @@ export default function SignupScreen() {
 
         try {
             const response = await dispatch(registerUser(formData));
+            console.log('response', response)
             if (registerUser.fulfilled.match(response)) {
                 Alert.alert("Registration successful");
                 // router.push('/home'); // Redirect on success
