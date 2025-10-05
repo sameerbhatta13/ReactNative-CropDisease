@@ -31,29 +31,29 @@ export default function HomeScreen() {
     <SafeAreaProvider>
       <View className="flex-1 p-6">
         {/* Header */}
-        <View className="flex-row items-center justify-center mb-6 ">
+        <View className="flex-row items-center  justify-center mb-6  ">
           <Image
-            source={require("@/assets/images/leaves.jpg")}
-            className="w-64 h-40"
-            contentFit="contain"
+            source={require("../../assets/images/leaves.jpg")}
+            style={{ width: 250, height: 180, borderRadius: 10 }}
+            contentFit="cover"
           />
         </View>
 
         {/* Title */}
         <View className="items-center mb-6">
           <Text className="text-sm font-bold">
-            Welcome! <Text className="text-xl bg-gradient-to-r from-orange-400 to-orange-500 text-transparent bg-clip-text">{user?.name || 'Farmer'}</Text>
+            Welcome! <Text className="text-xl  bg-gradient-to-r from-orange-400 to-orange-500 text-transparent bg-clip-text">{user?.name || 'Farmer'}</Text>
           </Text>
         </View>
 
         <ScrollView>
-          <View className="space-y-4">
+          <View className="space-y-10">
             {steps.map((step, index) => (
               <View
                 key={index}
-                className="flex-row items-start bg-gray-700 p-4 rounded-2xl shadow-md"
+                className="flex-row mt-3  items-start bg-gray-700 p-4 rounded-2xl shadow-md"
               >
-                <View className="mr-4 mt-1">
+                <View className="mr-4 mt-10">
                   <View className="bg-green-500 w-10 h-10 rounded-full items-center justify-center">
                     <MaterialIcons name={step.icon as any} size={24} color="white" />
                   </View>
