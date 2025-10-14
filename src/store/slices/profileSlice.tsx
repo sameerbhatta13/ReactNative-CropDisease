@@ -68,6 +68,7 @@ export const updateProfile = createAsyncThunk(
             const response = await api.patch("/profile", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+            // console.log('response', response)
             return response.data;
         } catch (err: any) {
             return rejectWithValue(err.response?.data);
