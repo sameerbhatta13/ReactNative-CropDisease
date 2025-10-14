@@ -1,4 +1,5 @@
 import { AppDispatch, RootState } from "@/src/store";
+import { getCurrentUser } from "@/src/store/slices/authSlice";
 import { createProfile, getProfile, updateProfile } from "@/src/store/slices/profileSlice";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -20,6 +21,9 @@ export default function EditProfile() {
     const { profile } = useSelector((state: RootState) => state.profile);
     const dispatch = useDispatch<AppDispatch>();
 
+    console.log('profile', profile)
+    console.log('current user', user)
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -28,14 +32,16 @@ export default function EditProfile() {
         phone: "",
         gender: "male",
         avatarUrl: "",
+        isNewImage: false, // Track if a new image is selected
     });
 
     useEffect(() => {
         dispatch(getProfile());
+        dispatch(getCurrentUser())
     }, [dispatch]);
 
     useEffect(() => {
-        if (user) {
+        if (profile) {
             setFormData({
                 name: profile?.user?.name || user?.name || "",
                 email: profile?.user?.email || user?.email || "",
@@ -44,6 +50,7 @@ export default function EditProfile() {
                 phone: profile?.phone || "",
                 gender: profile?.gender || "male",
                 avatarUrl: profile?.avatarUrl || "",
+                isNewImage: false,
             });
         }
     }, [profile]);
@@ -57,6 +64,7 @@ export default function EditProfile() {
             setFormData((prev) => ({
                 ...prev,
                 avatarUrl: result.assets[0].uri,
+                isNewImage: true, // Mark as new image
             }));
         }
     };
@@ -71,12 +79,17 @@ export default function EditProfile() {
     const handleSubmit = async () => {
         try {
             const form = new FormData();
-            form.append("dob", formData.dob);
-            form.append("address", formData.address);
-            form.append("phone", formData.phone);
-            form.append("gender", formData.gender);
+            // Append fields only if they have values
+            if (formData.name) form.append("name", formData.name)
+            if (formData.email) form.append("email", formData.email)
+            if (formData.dob) form.append("dob", formData.dob);
+            if (formData.address) form.append("address", formData.address);
+            if (formData.phone) form.append("phone", formData.phone);
+            if (formData.gender) form.append("gender", formData.gender);
 
-            if (formData.avatarUrl && !formData.avatarUrl.startsWith("http")) {
+            // Append avatarUrl only if a new image is selected
+            if (formData.isNewImage && formData.avatarUrl) {
+
                 form.append("avatarUrl", {
                     uri: formData.avatarUrl,
                     type: "image/jpeg",
@@ -86,14 +99,18 @@ export default function EditProfile() {
 
             let response;
             if (profile && profile._id) {
+                // console.log('Dispatching updateProfile...');
                 response = await dispatch(updateProfile(form)).unwrap();
-                console.log("Profile updated:", response);
+                // console.log("Profile updated:", response);
             } else {
+                // console.log('Dispatching createProfile...');
                 response = await dispatch(createProfile(form)).unwrap();
-                console.log("Profile created:", response);
+                // console.log("Profile created:", response);
             }
-        } catch (error) {
-            console.log("Error:", error);
+        } catch (error: any) {
+            // console.error("Error updating profile:", error);
+            // console.error("Error details:", error.message, error.stack, error.response?.data);
+            alert(`Failed to update profile: ${error.message || 'Unknown error'}`);
         }
     };
 
@@ -112,7 +129,7 @@ export default function EditProfile() {
                 <TouchableOpacity className="items-center mb-6" onPress={pickImage}>
                     {formData.avatarUrl ? (
                         <Image
-                            source={{ uri: formData.avatarUrl }}
+                            source={{ uri: formData.avatarUrl.startsWith("http") ? formData.avatarUrl : `http://192.168.1.68:3000${formData.avatarUrl}` }}
                             className="w-24 h-24 rounded-full"
                         />
                     ) : (
